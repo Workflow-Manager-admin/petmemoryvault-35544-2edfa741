@@ -26,6 +26,9 @@ function PetMemoryVaultMainContainer() {
   const [nav, setNav] = useState("Home");
   const [petProfileImage, setPetProfileImage] = useState(null);
 
+  // Modal states for buttons
+  const [modal, setModal] = useState(null); // e.g. "addMemory", "uploadPhotoAddMemory", "uploadPhotoPhotos", "addMilestone"
+
   // Handlers
   const handleProfileImageUpload = (e) => {
     const file = e.target.files[0];
@@ -34,18 +37,20 @@ function PetMemoryVaultMainContainer() {
       setPetProfileImage(imgUrl);
     }
   };
+  // Modal close
+  const closeModal = () => setModal(null);
 
   // -- Main content rendering by section --
   function renderSection() {
     switch (nav) {
       case "Timeline":
-        return <TimelinePlaceholder />;
+        return <TimelinePlaceholder onAddMemoryClick={() => setModal("addMemory")} />;
       case "AddMemory":
-        return <AddMemoryPlaceholder />;
+        return <AddMemoryPlaceholder onUploadPhotoClick={() => setModal("uploadPhotoAddMemory")} />;
       case "Photos":
-        return <PhotosPlaceholder />;
+        return <PhotosPlaceholder onUploadPhotoClick={() => setModal("uploadPhotoPhotos")} />;
       case "Milestones":
-        return <MilestonesPlaceholder />;
+        return <MilestonesPlaceholder onAddMilestoneClick={() => setModal("addMilestone")} />;
       case "Scrapbook":
         return <ScrapbookPlaceholder />;
       case "Share":
@@ -106,6 +111,31 @@ function PetMemoryVaultMainContainer() {
     </button>
   );
 
+  // Generic Modal component
+  function SimpleModal({ isOpen, title, children, onClose }) {
+    if (!isOpen) return null;
+    return (
+      <div style={{
+        position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
+        background: "rgba(38,50,68,0.31)", zIndex: 1001, display: "flex", alignItems: "center", justifyContent: "center"
+      }}>
+        <div style={{
+          background: "#fffefa", borderRadius: 12, minWidth: 280, maxWidth: "95vw",
+          boxShadow: "0 4px 32px 0 rgba(0,0,0,0.12)", padding: 32, position: "relative"
+        }}>
+          <button
+            style={{ position: "absolute", right: 16, top: 10, background: "none", border: "none", fontSize: 24, color: "#F67280", cursor: "pointer" }}
+            aria-label="Close Modal"
+            onClick={onClose}
+            tabIndex={0}
+          >×</button>
+          <h2 style={{ marginTop: 0, marginBottom: 12, color: "#A1C6EA" }}>{title}</h2>
+          {children}
+        </div>
+      </div>
+    );
+  }
+
   // Layout
   return (
     <div className="pmv-app">
@@ -130,60 +160,96 @@ function PetMemoryVaultMainContainer() {
       <footer className="pmv-footer">
         &copy; {new Date().getFullYear()} PetMemoryVault &mdash; All rights reserved.
       </footer>
+
+      {/* Modals for each action button */}
+      <SimpleModal
+        isOpen={modal === "addMemory"}
+        title="Add Memory"
+        onClose={closeModal}
+      >
+        <p>This is the Add Memory dialog. In a real app, you'd enter memory details here.</p>
+        <button className="pmv-primary-btn" onClick={closeModal}>Close</button>
+      </SimpleModal>
+      <SimpleModal
+        isOpen={modal === "uploadPhotoAddMemory"}
+        title="Upload Photo"
+        onClose={closeModal}
+      >
+        <p>This dialog will let you upload a photo as part of adding a memory.</p>
+        <button className="pmv-primary-btn" onClick={closeModal}>Close</button>
+      </SimpleModal>
+      <SimpleModal
+        isOpen={modal === "uploadPhotoPhotos"}
+        title="Upload Photos"
+        onClose={closeModal}
+      >
+        <p>This dialog will let you upload photos to your vault. (Coming soon!)</p>
+        <button className="pmv-primary-btn" onClick={closeModal}>Close</button>
+      </SimpleModal>
+      <SimpleModal
+        isOpen={modal === "addMilestone"}
+        title="Add Milestone"
+        onClose={closeModal}
+      >
+        <p>This is the Add Milestone dialog. Mark a special event!</p>
+        <button className="pmv-primary-btn" onClick={closeModal}>Close</button>
+      </SimpleModal>
     </div>
   );
 }
 
 
-// Placeholder Components
+/*
+  Placeholder Components updated to receive modal open handlers for interactivity.
+*/
 
-function AddMemoryPlaceholder() {
+function AddMemoryPlaceholder({ onUploadPhotoClick }) {
   // PUBLIC_INTERFACE
-  /** Placeholder for the Add Memory feature */
+  /** Placeholder for the Add Memory feature with enabled Upload Photo */
   return (
     <section className="pmv-section">
       <h2>Add a Memory</h2>
       <p>Add special pet moments here. (Form to be implemented.)</p>
-      <button className="pmv-accent-btn disabled">Upload Photo</button>
+      <button className="pmv-accent-btn" onClick={onUploadPhotoClick}>Upload Photo</button>
       <button className="pmv-primary-btn disabled">Save Memory</button>
     </section>
   );
 }
 
-function TimelinePlaceholder() {
+function TimelinePlaceholder({ onAddMemoryClick }) {
   // PUBLIC_INTERFACE
-  /** Placeholder for the Timeline feature */
+  /** Placeholder for the Timeline feature with enabled Add Memory button */
   return (
     <section className="pmv-section">
       <h2>Timeline</h2>
       <p>All your memories will appear here in chronological order.</p>
-      <button className="pmv-primary-btn disabled">+ Add Memory</button>
+      <button className="pmv-primary-btn" onClick={onAddMemoryClick}>+ Add Memory</button>
       <div className="pmv-card-list"><div className="pmv-card pmv-card-empty">No memories yet.</div></div>
     </section>
   );
 }
 
-function PhotosPlaceholder() {
+function PhotosPlaceholder({ onUploadPhotoClick }) {
   // PUBLIC_INTERFACE
-  /** Placeholder for the Photos feature */
+  /** Placeholder for the Photos feature with enabled Upload Photo button */
   return (
     <section className="pmv-section">
       <h2>Photos</h2>
       <p>Upload and view your pet's best shots here.</p>
-      <button className="pmv-accent-btn disabled">Upload Photo</button>
+      <button className="pmv-accent-btn" onClick={onUploadPhotoClick}>Upload Photo</button>
       <div className="pmv-photo-grid pmv-photo-grid-empty">No photos uploaded.</div>
     </section>
   );
 }
 
-function MilestonesPlaceholder() {
+function MilestonesPlaceholder({ onAddMilestoneClick }) {
   // PUBLIC_INTERFACE
-  /** Placeholder for the Milestones feature */
+  /** Placeholder for the Milestones feature with enabled Add Milestone button */
   return (
     <section className="pmv-section">
       <h2>Milestones</h2>
       <p>Add and browse important events in your pet’s life.</p>
-      <button className="pmv-secondary-btn disabled">Add Milestone</button>
+      <button className="pmv-secondary-btn" onClick={onAddMilestoneClick}>Add Milestone</button>
       <ul className="pmv-milestone-list pmv-milestone-list-empty">
         <li>No milestones added yet.</li>
       </ul>
